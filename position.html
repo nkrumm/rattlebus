@@ -1,0 +1,43 @@
+<html>
+<head>
+<style>
+	.value {font-size: 24px;}
+</style>
+<script type="text/javascript">
+	var watcher, options
+	options = {
+	  enableHighAccuracy: false,
+	  timeout: 5000,
+	  maximumAge: 0
+	};
+	if (navigator.geolocation) {
+	  var timeoutVal = 10;
+	  navigator.geolocation.getCurrentPosition(
+	    displayPosition, 
+	    displayError,
+	    options
+	  );
+	  watcher = navigator.geolocation.watchPosition(displayPosition, displayError, options);
+	}
+
+	else {
+	  alert("Geolocation is not supported by this browser");
+	}
+
+	function displayPosition(position) {
+	  //alert("Latitude: " + position.coords.latitude + ", Longitude: " + position.coords.longitude);
+	  $('#val_lat').html(position.coords.latitude);
+	  $('#val_long').html(position.coords.longitude);
+	}
+	function displayError(error){
+		console.log(error)
+	}
+</script>
+<script type="text/javascript" src = "http://code.jquery.com/jquery-1.6.2.min.js"></script>
+</head>
+
+<body>
+	<p>Latitidue: <div class='value' id='val_lat'>0</div></p>
+	<p>Longitude: <div class='value' id='val_long'>0</div></p>
+</body>
+</html>

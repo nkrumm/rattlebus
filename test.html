@@ -1,0 +1,66 @@
+<html>
+<head>
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.css" />     
+<script type="text/javascript" src = "http://code.jquery.com/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src = "http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.js"></script>
+<style>
+.value {font-size: 24px;}
+</style>
+<script>
+var max_x = 0
+var max_y = 0
+var max_z = 0
+function process_motion(event) {
+	x = event.acceleration.x
+	y = event.acceleration.y
+	z = event.acceleration.z
+	$('#val_x').html(x.toFixed(1));
+	$('#val_y').html(y.toFixed(1));
+	$('#val_z').html(z.toFixed(1));
+	if (x > max_x) {
+		$('#max_val_x').html(x);
+		max_x = x;
+	}
+	if (y > max_y) {
+		$('#max_val_y').html(y);
+		max_y = y;
+	}
+	if (z > max_z) {
+		$('#max_val_z').html(z);
+		max_z = z;
+	}
+}
+$(document).ready(function(){
+	window.addEventListener("devicemotion",process_motion,false);
+});
+</script>
+</head>
+<body>
+	<p>X: <div class='value' id='val_x'>0</div></p>
+	<p>Y: <div class='value' id='val_y'>0</div></p>
+	<p>Z: <div class='value' id='val_z'>0</div></p>
+	<p>Max X: <div class='value' id='max_val_x'>0</div></p>
+	<p>Max Y: <div class='value' id='max_val_y'>0</div></p>
+	<p>Max Z: <div class='value' id='max_val_z'>0</div></p>
+</body>
+</html>
+
+  <!--        
+	<script type="text/javascript">
+
+  
+		function onDeviceMotion(event){
+			var ctx = document.getElementById("c").getContext("2d");
+			var accel = event.accelerationIncludingGravity;
+			$("#sliderX").val(Math.round(accel.x)).slider("refresh");
+			$("#sliderY").val(Math.round(accel.y)).slider("refresh"); 
+			$("#sliderZ").val(Math.round(accel.z)).slider("refresh");
+			var angle = Math.atan2(accel.y,accel.x)  
+			ctx.clearRect(0,0,100,100);
+			ctx.beginPath();
+			ctx.arc(50,50,5,0,2*Math.PI,false);
+			ctx.moveTo(50,50);
+			ctx.lineTo(50-50*Math.cos(angle),50+50*Math.sin(angle));
+			ctx.stroke();
+		}
+	</script> -->

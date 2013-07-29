@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Rattlebus</title>
+
+    <!-- Bootstrap -->
+    <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">    
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- D3 -->
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <!-- AngularJS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="http://10.0.0.2:8124/debug.js"></script>
+    <link href="static/chart.css" rel="stylesheet" media="screen">
+    <style>
+    .body {
+      margin: 0px;
+      padding: 0px;
+      border: 0px;
+    }
+    .red {color: red;}
+    .blue {color: blue;}
+    .hbar {
+      height: 15px;
+      width: 10px;
+      margin: 1px;
+      display: block;
+      position: relative;
+      background-color: gray;
+      vertical-align: baseline;
+      transition: width 0.5s;
+      -webkit-transition: width 0.5s; /* Safari */
+    }
+    .hbar.red {background-color: red;}
+    .hbar.fast {
+     transition: width 0.1s;
+      -webkit-transition: width 0.1s; /* Safari */ 
+    }
+    .bigstat {
+      display: inline-block;
+      font-size: 26px;
+    }
+    .statcontainer {
+      margin-top: 5px;
+      margin-bottom: 5px;
+      display: block;
+      width: 100%;
+    }
+    .statlabel {
+      font-size: 10px;
+      font-family: Helvetica;
+      margin: 0px;
+      display: block;
+    }
+    .panel {
+      padding: 5px;
+      margin-top: 5px;
+    }
+    .panel.shaded {
+      background-color: #ddd;
+      border-bottom: #aaa 2px solid;
+      border-top: #aaa 2px solid;
+    }
+    .panel.centered {
+      text-align: center;
+    }
+    </style>
+    <script>
+    var  App = angular.module("App", []);
+
+    App.filter("round", function (){
+        return function (number, to_digits){
+          return number.toFixed(to_digits);
+        }
+      });
+
+    App.factory('Data', function ($rootScope) {
+      var acceleration = [0];
+      var rolling_interval = 50;
+      var rattle_trigger = 10;
+      return {
+          getAllData: function () {return acceleration;},
+          getCurrentAcceleration: function () { return acceleration[acceleration.length-1];},
+          getCurrentAbsAcceleration: function () { return Math.abs(acceleration[acceleration.length-1]);},
+          getMaximumAcceleration: function () { return Math.max.apply(null, acceleration);},
+          getRollingMaximum: function () {
+            var slice = acceleration.slice(acceleration.length-rolling_interval, acceleration.length);
+            return Math.max.apply(null, slice);
+          },
+          recordAcceleration: function (value) {
+            if (acceleration.length >= 500){
+                acceleration.shift();
+            }
+            $rootScope.$broadcast('data-update', value);
+            return acceleration.push(value); // returns length of acceleration data
+          },
+          getRollingInterval: function(){return rolling_interval;},
+          setRollingInterval: function(r){rolling_interval = r;},
+      }
+    });
+
+    App.controller("StatsViewer", function ($scope, $window, Data){
+      $scope.data = Data;
+      $scope.process_motion = function(event){
+        $scope.$apply(
+          function () {x = $scope.data.recordAcceleration(event.acceleration.y);}
+        );
+      };
+
+      $scope.isRecording = false
+      $scope.toggleRecording = function (){
+        if ($scope.isRecording){
+          $window.removeEventListener("devicemotion", $scope.process_motion, false);
+        } else {
+          $window.addEventListener("devicemotion",$scope.process_motion,false);
+        }
+        $scope.isRecording = !$scope.isRecording
+      }
+
+    }); // end controller
+
+    App.controller("Chart", function ($scope, Data){
+      //in_data = Data.getAllData()
+      //$scope.chartdata = Data.acceleration
+      $scope.n = 100;
+      var random = d3.random.normal(0, .2);
+      $scope.chartdata = d3.range($scope.n).map(random);
+
+      $scope.margin = {top: 2, right: 5, bottom: 2, left: 0}
+      $scope.width = 275 - $scope.margin.left - $scope.margin.right,
+      $scope.height = 100 - $scope.margin.top - $scope.margin.bottom;
+
+      $scope.x = d3.scale.linear()
+                  .domain([0, $scope.n - 1])
+                  .range([0, $scope.width]);
+
+      $scope.y = d3.scale.linear()
+                  .domain([-20, 20])
+                  .range([$scope.height, 0]);
+
+      $scope.line = d3.svg.line()
+                  .x(function(d, i) { return $scope.x(i); })
+                  .y(function(d, i) { return $scope.y(d); });
+
+    }); // end controller
+
+    App.directive("linechart",function(){
+      return {
+        restrict: "E", 
+        link: function (scope, element, attrs){
+          var svg = d3.select("#"+element[0].id).append("svg") 
+            .attr("width", scope.width + scope.margin.left + scope.margin.right)
+            .attr("height", scope.height + scope.margin.top + scope.margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + scope.margin.left + "," + scope.margin.top + ")");
+
+          svg.append("defs").append("clipPath")
+              .attr("id", "clip")
+              .append("rect")
+              .attr("width", scope.width)
+              .attr("height", scope.height);
+
+          // svg.append("g")
+          //     .attr("class", "y axis")
+          //     .call(d3.svg.axis().scale(scope.y).orient("left"));
+          
+          var path = svg.append("g")
+              .attr("clip-path", "url(#clip)")
+              .append("path")
+              .data([scope.chartdata])
+              .attr("class", "line")
+              .attr("d", scope.line);
+
+          scope.$on("data-update", function (event, value){
+            scope.chartdata.push(value);
+            path
+              .attr("d", scope.line)
+              .attr("transform", null)
+              .transition()
+              .duration(100)
+              .ease("linear")
+              .attr("transform", "translate(" + scope.x(-1) + ")")
+            
+            scope.chartdata.shift()
+
+          });
+        }
+      }
+    }) // end directive
+
+    App.directive("stat", function () {
+      return {
+        restrict: "A",
+        template: '{{value}}',
+        scope: {
+          value : "="
+        },
+        link: function (scope, element, attrs){
+          scope.$watch("value", function(newval){
+            if (newval){
+              newval = parseFloat(newval)
+              if (newval > attrs.highlight){
+                element.addClass(attrs.highlightClass);
+              } else {
+                element.removeClass(attrs.highlightClass);
+              }
+            }
+          }); // end $watch
+        }
+      }
+    }); // end directive
+
+    App.directive("hbar", function(){
+      return {
+        restrict: "E",
+        template: '<div class="hbar"></div>',
+        scope: {
+          value: "="
+        },
+        replace: true,
+        link: function (scope, element, attrs){
+          scope.$watch("value", function(newval){
+            if (newval){
+              newval =  parseFloat(newval)
+              width = newval * 10  + 10
+              if (width > attrs.maxWidth){
+                width = attrs.maxWidth;
+              }
+              $(element).width(width);
+              if (newval > parseFloat(attrs.highlight)){
+                $(element).addClass(attrs.highlightClass);
+              } else {
+                $(element).removeClass(attrs.highlightClass);
+              }
+            }
+          }); // end scope
+        } // end link
+      }
+    }); // end directive
+
+    </script>
+  </head>
+  <body>
+    <div class='panel centered'><img src='static/logo.png' width="50%" /></div>
+    <div ng-app="App">
+      <div ng-controller='StatsViewer'>
+        <div class='panel shaded'>
+          <div class='statcontainer'>
+            <div class='statlabel'>CURRENT</div>
+              <div class='bigstat'>
+                <span stat style='font-weight: bold;' highlight="10" highlight-class='red' value="data.getRollingMaximum() | round:2"></span> m/s<sup>2</sup>
+                <hbar class='fast' value="data.getRollingMaximum()" highlight="10" highlight-class='red' max-width="240"></hbar>
+              </div>
+          </div>
+          <div class='statcontainer'>
+            <div class='statlabel'>MAX</div>
+              <div class='bigstat'>
+                <span stat style='font-weight: bold;' highlight="10" highlight-class='red' value="data.getMaximumAcceleration() | round:2"></span> m/s<sup>2</sup>
+                <hbar value="data.getMaximumAcceleration()" highlight="10" highlight-class='red' max-width="240"></hbar>
+              </div>
+          </div>
+        </div>
+    </div><!-- end controller -->
+    <div class='panel shaded'>
+      <div ng-controller='Chart'>
+          <linechart id='chart'></linechart>
+      </div>
+    </div>
+    <div class='panel centered'>
+      <div ng-controller='StatsViewer'>
+        <!-- <button type='button' class='btn btn-success btn-large' ng-click='toggleRecording()'>Start Recording</button> -->
+        <button class="btn btn-large" ng-class="{true: 'btn-success', false: 'btn-danger'}[!isRecording]" ng-click="toggleRecording()">
+          {{!isRecording && 'Start' || 'Stop'}} Recording</button>
+
+      </div>
+    </div>
+    </div>
+    <!-- JavaScript plugins (requires jQuery) -->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="static/bootstrap/js/bootstrap.min.js"></script>     
+  </body>
+</html>
