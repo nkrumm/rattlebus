@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+      #map-canvas { height: 340px; width: 400px; }
+    </style>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIGe5unWNEDISu8fKc27k_vZBQhomjZrU&sensor=true">
+    </script>
+    <script type="text/javascript">
+      var map;
+      function initialize(position) {
+        var mapOptions = {
+          center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+          zoom: 15,
+          disableDefaultUI: true,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(document.getElementById("map-canvas"),
+            mapOptions);
+      }
+      //google.maps.event.addDomListener(window, 'load', initialize);
+      var watcher, options, initialized
+      initialized = false
+        options = {
+          enableHighAccuracy: false,
+          timeout: 5000,
+          maximumAge: 0
+        };
+        if (navigator.geolocation) {
+          watcher = navigator.geolocation.watchPosition(displayPosition, displayError, options);
+        }
+        else {
+          alert("Geolocation is not supported by this browser");
+        }
+
+        function displayPosition(position) {
+            console.log(position)
+            if (initialized){
+                map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude))
+            } else {
+                initialize(position)
+                initialized = true
+            }
+        }
+        function displayError(error){
+            console.log(error)
+        }
+
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"/>
+  </body>
+</html>
