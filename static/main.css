@@ -1,0 +1,51 @@
+.body {
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+}
+.red {color: red;}
+.blue {color: blue;}
+.hbar {
+  height: 15px;
+  width: 10px;
+  margin: 1px;
+  display: block;
+  position: relative;
+  background-color: gray;
+  vertical-align: baseline;
+  transition: width 0.5s;
+  -webkit-transition: width 0.5s; /* Safari */
+}
+.hbar.red {background-color: red;}
+.hbar.fast {
+ transition: width 0.1s;
+  -webkit-transition: width 0.1s; /* Safari */ 
+}
+.bigstat {
+  display: inline-block;
+  font-size: 26px;
+}
+.statcontainer {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  display: block;
+  width: 100%;
+}
+.statlabel {
+  font-size: 10px;
+  font-family: Helvetica;
+  margin: 0px;
+  display: block;
+}
+.panel {
+  padding: 5px;
+  margin-top: 5px;
+}
+.panel.shaded {
+  background-color: #ddd;
+  border-bottom: #aaa 2px solid;
+  border-top: #aaa 2px solid;
+}
+.panel.centered {
+  text-align: center;
+}
