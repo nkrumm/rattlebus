@@ -57,7 +57,22 @@
           getRollingInterval: function(){return rolling_interval;},
           setRollingInterval: function(r){rolling_interval = r;},
       }
-    });
+    }); // end factory // Data
+    App.factory('Position', function ($rootScope){
+      var center = new google.maps.LatLng();
+      $scope.geolocationAvailable = navigator.geolocation ? true : false;
+      return {
+        //  getCurrentPosition: function() {
+        //   navigator.geolocation.getCurrentPosition(function (position) {
+        //     return {
+        //         latitude: position.coords.latitude,
+        //         longitude: position.coords.longitude
+        //       };
+        //     }
+        // }
+      }
+
+    }); // end factory Position
 
     App.controller("StatsViewer", function ($scope, $window, Data){
       $scope.data = Data;
@@ -104,13 +119,19 @@
 
     }); // end controller
 
-    App.controller("Map", function($scope){
+    App.controller("Map", function($scope, Position){
       $scope.center = {
         latitude: 0, // initial map center latitude
         longitude: 0, // initial map center longitude
       }
-      $scope.markers= [] // an array of markers,
-      $scope.zoom= 8 // the zoom level
+      $scope.markers = [] // an array of markers,
+      $scope.zoom = 8 // the zoom level
+
+      // for some reason this has to be included as a json-string in the directive below. :(
+      // $scope.mopts = {
+      //   disableDefaultUI: true,
+      //   mapTypeId: google.maps.MapTypeId.ROADMAP
+      // }
     }); // end controller
 
     App.controller("Slider", function($scope){
@@ -246,7 +267,7 @@
       </div>
       <div class='panel shaded' hm-swipe-right="slide(0)" hm-swipe-left="slide(-2)">
         <div ng-controller='Map'>
-            <google-map id="map" center="center" draggable="false" zoom="zoom" markers="markers" mark-click="false" style="height: 100px"></google-map>
+            <google-map id="map" center="center" options='{"mapTypeId": "google.maps.MapTypeId.ROADMAP", "disableDefaultUI": "true"}' draggable="false" zoom="zoom" markers="markers" mark-click="false"></google-map>
         </div>
       </div>
       <div class='panel shaded' hm-swipe-right="slide(-1)">
