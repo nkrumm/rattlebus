@@ -2,3 +2,5 @@
 dev/line-chart/
 
 dev/npm-debug.log
+.sublime-project/
+*.sublime-*/
