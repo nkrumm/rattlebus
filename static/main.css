@@ -55,8 +55,24 @@ body {
   text-align: center;
 }
 
+#sliderbox-container {
+  overflow: hidden;
+  width: 300px;
+  height: 145px;
+  margin: 0;
+}
 
-
+#sliderbox-slider {
+  width:1000px;
+  -webkit-transition:all .175s ease-in-out;
+  -moz-transition:all .175s ease-in-out;
+  -o-transition:all .175s ease-in-out;
+  transition:all .175s ease-in-out;
+}
+#sliderbox-slider .panel{
+  float: left;
+  width: 300px;
+}
 
 
 .btn {
