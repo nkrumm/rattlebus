@@ -10,12 +10,20 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <!-- AngularJS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+    <script src="/static/angular/gestures.min.js"></script>
     <!-- styles -->
     <link href="static/chart.css" rel="stylesheet" media="screen">
     <link href="static/main.css" rel="stylesheet" media="screen">
 
     <script>
-    var  App = angular.module("App", []);
+    document.addEventListener(
+      'touchmove',
+      function(e) {
+        e.preventDefault();
+      },
+      false
+    );
+    var  App = angular.module("App", ["angular-gestures"]);
 
     App.filter("round", function (){
         return function (number, to_digits){
@@ -96,7 +104,7 @@
     App.controller("Slider", function($scope){
       $scope.x_coord = 0;
       $scope.slide = function (to_pixel){
-        $scope.x_coord = to_pixel;
+        $scope.x_coord = to_pixel * 320;
       }
     }); // end controller
     
@@ -217,21 +225,23 @@
           </div>
         </div>
     </div><!-- end controller -->
-
     <div id='sliderbox-container' ng-controller='Slider'>
       <div id='sliderbox-slider' ng-style="{'-webkit-transform': 'translateX(' + x_coord + 'px)'}">
-      <div class='panel shaded'>
+      <div class='panel shaded' hm-swipe-left="slide(-1)">
         <div ng-controller='Chart'>
             <linechart id='chart'></linechart>
         </div>
       </div>
-      <div class='panel shaded'>
+      <div class='panel shaded' hm-swipe-right="slide(0)" hm-swipe-left="slide(-2)">
         I am the map!
+      </div>
+      <div class='panel shaded' hm-swipe-right="slide(-1)">
+        I am the FFT!
       </div>
       </div>
       <div class='panel centered'>
         <button ng-click="slide(0)">Real-Time view</button> 
-        <button ng-click="slide(300)">Map view</button>
+        <button ng-click="slide(-1)">Map view</button>
       </div>
 
     </div>
