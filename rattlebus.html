@@ -5,7 +5,9 @@
 
     <!-- Bootstrap -->
     <!--<link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=320.1, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <!-- D3 -->
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <!-- Google Maps -->
@@ -60,7 +62,7 @@
     }); // end factory // Data
     App.factory('Position', function ($rootScope){
       var center = new google.maps.LatLng();
-      $scope.geolocationAvailable = navigator.geolocation ? true : false;
+      $rootScope.geolocationAvailable = navigator.geolocation ? true : false;
       return {
         //  getCurrentPosition: function() {
         //   navigator.geolocation.getCurrentPosition(function (position) {
@@ -119,7 +121,7 @@
 
     }); // end controller
 
-    App.controller("Map", function($scope, Position){
+    App.controller("Map", function ($scope, Position){
       $scope.center = {
         latitude: 0, // initial map center latitude
         longitude: 0, // initial map center longitude
@@ -134,14 +136,14 @@
       // }
     }); // end controller
 
-    App.controller("Slider", function($scope){
+    App.controller("Slider", function ($scope){
       $scope.x_coord = 0;
       $scope.slide = function (to_pixel){
         $scope.x_coord = to_pixel * 320;
       }
     }); // end controller
     
-    App.directive("linechart",function(){
+    App.directive("linechart",function (){
       return {
         restrict: "E", 
         link: function (scope, element, attrs){
@@ -207,7 +209,7 @@
       }
     }); // end directive
 
-    App.directive("hbar", function(){
+    App.directive("hbar", function (){
       return {
         restrict: "E",
         template: '<div class="hbar"></div>',
@@ -291,7 +293,7 @@
     </div>
     </div>
     <!-- JavaScript plugins (requires jQuery) -->
-    <!--<script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="http://code.jquery.com/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <!--<script src="static/bootstrap/js/bootstrap.min.js"></script>     -->
   </body>
