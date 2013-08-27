@@ -8,9 +8,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <!-- D3 -->
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <!-- Google Maps -->
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIGe5unWNEDISu8fKc27k_vZBQhomjZrU&sensor=true"></script>
     <!-- AngularJS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
     <script src="/static/angular/gestures.min.js"></script>
+    <script src="/static/angular/angular-google-maps.js"></script>
     <!-- styles -->
     <link href="static/chart.css" rel="stylesheet" media="screen">
     <link href="static/main.css" rel="stylesheet" media="screen">
@@ -23,7 +26,7 @@
       },
       false
     );
-    var  App = angular.module("App", ["angular-gestures"]);
+    var  App = angular.module("App", ["angular-gestures","google-maps"]);
 
     App.filter("round", function (){
         return function (number, to_digits){
@@ -99,6 +102,15 @@
                   .x(function(d, i) { return $scope.x(i); })
                   .y(function(d, i) { return $scope.y(d); });
 
+    }); // end controller
+
+    App.controller("Map", function($scope){
+      $scope.center = {
+        latitude: 0, // initial map center latitude
+        longitude: 0, // initial map center longitude
+      }
+      $scope.markers= [] // an array of markers,
+      $scope.zoom= 8 // the zoom level
     }); // end controller
 
     App.controller("Slider", function($scope){
@@ -233,7 +245,9 @@
         </div>
       </div>
       <div class='panel shaded' hm-swipe-right="slide(0)" hm-swipe-left="slide(-2)">
-        I am the map!
+        <div ng-controller='Map'>
+            <google-map id="map" center="center" draggable="false" zoom="zoom" markers="markers" mark-click="false" style="height: 100px"></google-map>
+        </div>
       </div>
       <div class='panel shaded' hm-swipe-right="slide(-1)">
         I am the FFT!

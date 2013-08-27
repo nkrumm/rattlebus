@@ -44,7 +44,7 @@ body {
 }
 .panel {
   padding: 5px;
-  margin-top: 5px;
+  margin: 5px;
 }
 .panel.shaded {
   background-color: #ddd;
@@ -58,7 +58,7 @@ body {
 #sliderbox-container {
   overflow: hidden;
   width: 300px;
-  height: 145px;
+  height: 150px;
   margin: 0;
 }
 
@@ -74,7 +74,10 @@ body {
   width: 300px;
 }
 
-
+#map {
+  height: 100px;
+  display: block;
+}
 .btn {
   display: inline-block;
   *display: inline;
