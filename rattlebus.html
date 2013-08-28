@@ -60,21 +60,22 @@
           setRollingInterval: function(r){rolling_interval = r;},
       }
     }); // end factory // Data
-    App.factory('Position', function ($rootScope){
+    App.factory('PositionData', function ($rootScope){
       var center = new google.maps.LatLng();
-      $rootScope.geolocationAvailable = navigator.geolocation ? true : false;
-      return {
-        //  getCurrentPosition: function() {
-        //   navigator.geolocation.getCurrentPosition(function (position) {
-        //     return {
-        //         latitude: position.coords.latitude,
-        //         longitude: position.coords.longitude
-        //       };
-        //     }
-        // }
-      }
+      var geolocationAvailable = navigator.geolocation ? true : false;
 
-    }); // end factory Position
+      return {
+        recordPosition: function (position) {
+          console.log(position)
+        },
+        getCurrentPosition: function () {
+          return false
+        }, // end getCurrentPosition
+        isGeolocationAvailable: function () {
+          return geolocationAvailable
+        }
+      } // end return
+    }); // end App.factory
 
     App.controller("StatsViewer", function ($scope, $window, Data){
       $scope.data = Data;
@@ -121,13 +122,32 @@
 
     }); // end controller
 
-    App.controller("Map", function ($scope, Position){
+    App.controller("Map", function ($scope, PositionData){
+      $scope.position = PositionData
       $scope.center = {
         latitude: 0, // initial map center latitude
         longitude: 0, // initial map center longitude
       }
       $scope.markers = [] // an array of markers,
-      $scope.zoom = 8 // the zoom level
+      $scope.zoom = 15 // the zoom level
+      
+      $scope.process_position = function (position) {
+        console.log(position)
+        $scope.$apply(function () { x = $scope.position.recordPosition(position); })
+        $scope.center = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        }
+      }
+
+      var watcher, options, initialized
+      initialized = false
+      watcherOptions = {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 5000
+      };
+      watcher = navigator.geolocation.watchPosition($scope.process_position, function () {return false}, watcherOptions);
 
       // for some reason this has to be included as a json-string in the directive below. :(
       // $scope.mopts = {
@@ -225,7 +245,7 @@
               if (width > attrs.maxWidth){
                 width = attrs.maxWidth;
               }
-              $(element).width(width);
+              $(element).attr("width", width);
               if (newval > parseFloat(attrs.highlight)){
                 $(element).addClass(attrs.highlightClass);
               } else {
@@ -270,6 +290,7 @@
       <div class='panel shaded' hm-swipe-right="slide(0)" hm-swipe-left="slide(-2)">
         <div ng-controller='Map'>
             <google-map id="map" center="center" options='{"mapTypeId": "google.maps.MapTypeId.ROADMAP", "disableDefaultUI": "true"}' draggable="false" zoom="zoom" markers="markers" mark-click="false"></google-map>
+
         </div>
       </div>
       <div class='panel shaded' hm-swipe-right="slide(-1)">
@@ -293,7 +314,7 @@
     </div>
     </div>
     <!-- JavaScript plugins (requires jQuery) -->
-    <script src="http://code.jquery.com/jquery.js"></script>
+    <!--<script src="http://code.jquery.com/jquery.js"></script>-->
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <!--<script src="static/bootstrap/js/bootstrap.min.js"></script>     -->
   </body>
