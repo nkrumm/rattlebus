@@ -5,7 +5,7 @@ var angularLocalStorage = angular.module('LocalStorageModule', []);
 
 // You should set a prefix to avoid overwriting any local storage variables from the rest of your app
 // e.g. angularLocalStorage.constant('prefix', 'youAppName');
-angularLocalStorage.value('prefix', 'ls');
+angularLocalStorage.value('prefix', 'ratttlebus');
 // Cookie options (usually in case of fallback)
 // expiry = Number of days before cookies expire // 0 = Does not expire
 // path = The web path the cookie represents
