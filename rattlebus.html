@@ -35,8 +35,26 @@
           return number.toFixed(to_digits);
         }
       });
-
-    App.factory('Data', function ($rootScope) {
+    App.factory('DataStore', function($rootScope, Data, PositionData){
+      var segments;
+      return {
+          storeSegment: function (segment) {
+              // store in local storage and return an ID
+              return segment_id
+          },
+          uploadSegmentByID: function (segment_id) {
+              // retrieve from local storage and upload to server
+              return true
+          },
+          uploadAllSegments: function () {
+              // upload all segments in the local storage
+          },
+          clearDataStore: function () {
+              // clears all segments from the current trip
+          }
+      }
+    }); // end factory // DataStore
+    App.factory('AccelData', function ($rootScope) {
       var acceleration = [0];
       var rolling_interval = 50;
       var rattle_trigger = 10;
@@ -63,22 +81,26 @@
     App.factory('PositionData', function ($rootScope){
       var center = new google.maps.LatLng();
       var geolocationAvailable = navigator.geolocation ? true : false;
-
+      locations = [];
       return {
         recordPosition: function (position) {
-          console.log(position)
+          console.log(locations)
+          if (locations.length >= 500){
+            locations.shift()
+          }
+          return locations.push(position)
         },
         getCurrentPosition: function () {
-          return false
-        }, // end getCurrentPosition
+          return locations[locations.length]
+        }, 
         isGeolocationAvailable: function () {
           return geolocationAvailable
         }
       } // end return
     }); // end App.factory
 
-    App.controller("StatsViewer", function ($scope, $window, Data){
-      $scope.data = Data;
+    App.controller("StatsViewer", function ($scope, $window, AccelData){
+      $scope.data = AccelData;
       $scope.process_motion = function(event){
         $scope.$apply(
           function () {x = $scope.data.recordAcceleration(event.acceleration.y);}
@@ -97,9 +119,9 @@
 
     }); // end controller
 
-    App.controller("Chart", function ($scope, Data){
-      //in_data = Data.getAllData()
-      //$scope.chartdata = Data.acceleration
+    App.controller("Chart", function ($scope, AccelData){
+      //in_data = AccelData.getAllData()
+      //$scope.chartdata = AccelData.acceleration
       $scope.n = 100;
       var random = d3.random.normal(0, .2);
       $scope.chartdata = d3.range($scope.n).map(random);
