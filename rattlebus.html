@@ -16,6 +16,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
     <script src="/static/angular/gestures.min.js"></script>
     <script src="/static/angular/angular-google-maps.js"></script>
+    <script src="/static/angular/angular-local-storage.js"></script>
     <!-- styles -->
     <link href="static/chart.css" rel="stylesheet" media="screen">
     <link href="static/main.css" rel="stylesheet" media="screen">
@@ -28,100 +29,119 @@
       },
       false
     );
-    var  App = angular.module("App", ["angular-gestures","google-maps"]);
+    function Segment(){
+        this.start_position = new google.maps.LatLng(),
+        this.end_position = new google.maps.LatLng(),
+        this.acceleration_data = new Array()
+    }
+    
+    var App = angular.module("App", ["angular-gestures","google-maps","LocalStorageModule"]);
 
     App.filter("round", function (){
         return function (number, to_digits){
           return number.toFixed(to_digits);
         }
       });
-    App.factory('DataStore', function($rootScope, Data, PositionData){
-      var segments;
-      return {
-          storeSegment: function (segment) {
-              // store in local storage and return an ID
-              return segment_id
-          },
-          uploadSegmentByID: function (segment_id) {
-              // retrieve from local storage and upload to server
-              return true
-          },
-          uploadAllSegments: function () {
-              // upload all segments in the local storage
-          },
-          clearDataStore: function () {
-              // clears all segments from the current trip
-          }
-      }
-    }); // end factory // DataStore
-    App.factory('AccelData', function ($rootScope) {
-      var acceleration = [0];
+
+    App.service('Data', function ($rootScope, localStorageService) {
+      // set up localdatastor
+      var ls = localStorageService;
+      ls.clearAll()
+
+      // set up acceleration measurements
       var rolling_interval = 50;
       var rattle_trigger = 10;
-      return {
-          getAllData: function () {return acceleration;},
-          getCurrentAcceleration: function () { return acceleration[acceleration.length-1];},
-          getCurrentAbsAcceleration: function () { return Math.abs(acceleration[acceleration.length-1]);},
-          getMaximumAcceleration: function () { return Math.max.apply(null, acceleration);},
-          getRollingMaximum: function () {
-            var slice = acceleration.slice(acceleration.length-rolling_interval, acceleration.length);
-            return Math.max.apply(null, slice);
-          },
-          recordAcceleration: function (value) {
-            if (acceleration.length >= 500){
-                acceleration.shift();
-            }
-            $rootScope.$broadcast('data-update', value);
-            return acceleration.push(value); // returns length of acceleration data
-          },
-          getRollingInterval: function(){return rolling_interval;},
-          setRollingInterval: function(r){rolling_interval = r;},
-      }
-    }); // end factory // Data
-    App.factory('PositionData', function ($rootScope){
+
+      // set up location measurements
       var center = new google.maps.LatLng();
       var geolocationAvailable = navigator.geolocation ? true : false;
-      locations = [];
+
+      // set up data struncture
+      var segments = new Array()
+      var currentSegmentId = 0;
+      console.log(currentSegmentId)
+      segments[currentSegmentId] = new Segment()
+
       return {
-        recordPosition: function (position) {
-          console.log(locations)
-          if (locations.length >= 500){
-            locations.shift()
-          }
-          return locations.push(position)
+        uploadSegment: function (segment_id) {
+          return false
         },
-        getCurrentPosition: function () {
-          return locations[locations.length]
-        }, 
-        isGeolocationAvailable: function () {
-          return geolocationAvailable
+        _accel_len: function () {
+          return this._accel().length
+        },
+        _csid: function () {
+          // return currentSegmentId
+          return currentSegmentId
+        },
+        _accel: function () {
+          // return entire current frame of acceleration data
+          return segments[this._csid()].acceleration_data
+        },
+        getCurrentAcceleration: function () {
+          // return last recorded value
+          return this._accel()[this._accel_len()-1]
+        },
+        getMaximumAcceleration: function () {
+          return Math.max.apply(null, this._accel());
+        },
+        getRollingMaximumAcceleration: function () {
+            var slice = this._accel().slice(this._accel_len()-rolling_interval, this._accel_len());
+            return Math.max.apply(null, slice);
+        },
+        recordAcceleration: function (value) {
+            $rootScope.$broadcast('data-update', value);
+            return segments[this._csid()].acceleration_data.push(value); // returns length of acceleration data
+        },
+        markPosition: function (position) {
+          curr_pos = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          }
+          segments[this._csid()].end_position = curr_pos
+          currentSegmentId += 1
+          segments[currentSegmentId] = new Segment()
+          segments[currentSegmentId].start_position = curr_pos
+          console.log("CSID: " + this._csid())
+          console.log("Total number of segments: " + segments.length)
         }
-      } // end return
-    }); // end App.factory
+      }
+    }); // end factory // Data
 
-    App.controller("StatsViewer", function ($scope, $window, AccelData){
-      $scope.data = AccelData;
-      $scope.process_motion = function(event){
+    App.controller("StatsViewer", function ($scope, $window, Data) {
+      $scope.data = Data
+      $scope.process_motion = function (event){
         $scope.$apply(
-          function () {x = $scope.data.recordAcceleration(event.acceleration.y);}
+          function () {
+            x = $scope.data.recordAcceleration(event.acceleration.y);
+            if ((x % 100) == 0){
+              console.log("Acceleration dataframe length: " + $scope.data._accel_len())
+            }
+          }
         );
-      };
-
-      $scope.isRecording = false
-      $scope.toggleRecording = function (){
-        if ($scope.isRecording){
-          $window.removeEventListener("devicemotion", $scope.process_motion, false);
-        } else {
-          $window.addEventListener("devicemotion",$scope.process_motion,false);
-        }
-        $scope.isRecording = !$scope.isRecording
       }
 
-    }); // end controller
+      $scope.isRecording = false
 
-    App.controller("Chart", function ($scope, AccelData){
-      //in_data = AccelData.getAllData()
-      //$scope.chartdata = AccelData.acceleration
+      // MOCK FOR TESTING ON DESKTOP ONLY
+      $scope.previous_rattle = 0
+      $scope.fakeRattle = function () {
+          $scope.previous_rattle += (Math.random() - 0.5)*5
+          return {acceleration: {y: $scope.previous_rattle}}
+      }
+
+      $scope.toggleRecording = function () {
+          if ($scope.isRecording){
+            //$window.removeEventListener("devicemotion", $scope.process_motion, false);
+            $window.clearInterval($scope.interval_id)
+          } else {
+            //$window.addEventListener("devicemotion",$scope.process_motion,false);
+            $scope.interval_id = $window.setInterval(function () {$scope.process_motion($scope.fakeRattle())}, 100)
+          }
+          $scope.isRecording = !$scope.isRecording
+      }
+    }); // end controller
+    
+    App.controller("Chart", function ($scope, Data) {
       $scope.n = 100;
       var random = d3.random.normal(0, .2);
       $scope.chartdata = d3.range($scope.n).map(random);
@@ -141,11 +161,10 @@
       $scope.line = d3.svg.line()
                   .x(function(d, i) { return $scope.x(i); })
                   .y(function(d, i) { return $scope.y(d); });
-
     }); // end controller
 
-    App.controller("Map", function ($scope, PositionData){
-      $scope.position = PositionData
+    App.controller("Map", function ($scope, $window, Data){
+      $scope.data = Data
       $scope.center = {
         latitude: 0, // initial map center latitude
         longitude: 0, // initial map center longitude
@@ -155,11 +174,12 @@
       
       $scope.process_position = function (position) {
         console.log(position)
-        $scope.$apply(function () { x = $scope.position.recordPosition(position); })
+        $scope.$apply(function () { x = $scope.data.markPosition(position); })
         $scope.center = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         }
+
       }
 
       var watcher, options, initialized
@@ -169,7 +189,19 @@
           timeout: 5000,
           maximumAge: 5000
       };
-      watcher = navigator.geolocation.watchPosition($scope.process_position, function () {return false}, watcherOptions);
+      //watcher = navigator.geolocation.watchPosition($scope.process_position, function () {return false}, watcherOptions);
+
+      // MOCK MODE
+      $scope.previous_lat =  48.6398716
+      $scope.fakePosition = function () {
+        var p = {coords: {
+                    latitude: $scope.previous_lat + (Math.random()/10), 
+                    longitude: -113.8742082
+                  }
+                }
+        return p
+      }
+      $window.setInterval(function () {$scope.process_position($scope.fakePosition())}, 10000)
 
       // for some reason this has to be included as a json-string in the directive below. :(
       // $scope.mopts = {
@@ -201,10 +233,6 @@
               .attr("width", scope.width)
               .attr("height", scope.height);
 
-          // svg.append("g")
-          //     .attr("class", "y axis")
-          //     .call(d3.svg.axis().scale(scope.y).orient("left"));
-          
           var path = svg.append("g")
               .attr("clip-path", "url(#clip)")
               .append("path")
@@ -213,15 +241,14 @@
               .attr("d", scope.line);
 
           scope.$on("data-update", function (event, value){
-            scope.chartdata.push(value);
-            path
-              .attr("d", scope.line)
+            scope.chartdata.push(value);  
+            path.attr("d", scope.line)
               .attr("transform", null)
               .transition()
               .duration(100)
               .ease("linear")
               .attr("transform", "translate(" + scope.x(-1) + ")")
-            
+            // clear the off-screen values since we do not need to display them
             scope.chartdata.shift()
 
           });
@@ -289,8 +316,8 @@
           <div class='statcontainer'>
             <div class='statlabel'>CURRENT</div>
               <div class='bigstat'>
-                <span stat style='font-weight: bold;' highlight="10" highlight-class='red' value="data.getRollingMaximum() | round:2"></span> m/s<sup>2</sup>
-                <hbar class='fast' value="data.getRollingMaximum()" highlight="10" highlight-class='red' max-width="240"></hbar>
+                <span stat style='font-weight: bold;' highlight="10" highlight-class='red' value="data.getRollingMaximumAcceleration() | round:2"></span> m/s<sup>2</sup>
+                <hbar class='fast' value="data.getRollingMaximumAcceleration()" highlight="10" highlight-class='red' max-width="240"></hbar>
               </div>
           </div>
           <div class='statcontainer'>
@@ -336,7 +363,7 @@
     </div>
     </div>
     <!-- JavaScript plugins (requires jQuery) -->
-    <!--<script src="http://code.jquery.com/jquery.js"></script>-->
+    <script src="http://code.jquery.com/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <!--<script src="static/bootstrap/js/bootstrap.min.js"></script>     -->
   </body>
