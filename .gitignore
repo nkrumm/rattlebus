@@ -2,6 +2,9 @@
 dev/line-chart/
 
 dev/npm-debug.log
-.sublime-project/
-*.sublime-*/
-rattlebus.sublime-project rattlebus.sublime-workspace
+.sublime-project
+*.sublime-*
+rattlebus.sublime-project
+rattlebus.sublime-workspace
+.DS_Store
+
