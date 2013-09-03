@@ -98,11 +98,17 @@
             longitude: position.coords.longitude
           }
           segments[this._csid()].end_position = curr_pos
-          currentSegmentId += 1
+          console.log("CSID: " + this._csid())
+          console.log("start_pos: (" + segments[this._csid()].start_position.latitude + ", " + segments[this._csid()].start_position.longitude + ")")
+          console.log("end_pos: (" + segments[this._csid()].end_position.latitude + ", " + segments[this._csid()].end_position.longitude + ")")
+          console.log("# measurements: " + this._accel_len())
+          console.log("max acceleration this segment: " + this.getMaximumAcceleration())
+          currentSegmentId += 1          
           segments[currentSegmentId] = new Segment()
           segments[currentSegmentId].start_position = curr_pos
-          console.log("CSID: " + this._csid())
+
           console.log("Total number of segments: " + segments.length)
+
         }
       }
     }); // end factory // Data
@@ -173,7 +179,6 @@
       $scope.zoom = 15 // the zoom level
       
       $scope.process_position = function (position) {
-        console.log(position)
         $scope.$apply(function () { x = $scope.data.markPosition(position); })
         $scope.center = {
           latitude: position.coords.latitude,
