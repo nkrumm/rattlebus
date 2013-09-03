@@ -103,11 +103,12 @@
           console.log("end_pos: (" + segments[this._csid()].end_position.latitude + ", " + segments[this._csid()].end_position.longitude + ")")
           console.log("# measurements: " + this._accel_len())
           console.log("max acceleration this segment: " + this.getMaximumAcceleration())
-          currentSegmentId += 1          
+          //this.uploadSegment(this._csid())
+          currentSegmentId += 1
           segments[currentSegmentId] = new Segment()
           segments[currentSegmentId].start_position = curr_pos
-
           console.log("Total number of segments: " + segments.length)
+
 
         }
       }
