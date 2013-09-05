@@ -1,4 +1,4 @@
-from flask import Flask, render_template, g, request, jsonify
+from flask import Flask, render_template, g, request, jsonify, abort, make_response
 from pymongo import MongoClient
 
 app = Flask(__name__)
@@ -25,8 +25,11 @@ def home():
 
 @app.route('/record/<int:record_id>/segment', methods=['POST'])
 def upload_segment(record_id=1):
-    request.data.update({"record_id": record_id})
-    g.rattlebus_db.insert(request.data)
+    data = request.json
+    data.update({"record_id": record_id})
+    g.rattlebus_db.insert(data)
+    del data["_id"]
+    return make_response(jsonify(data))
 
 
 @app.route('/record/<int:record_id>', methods=['GET'])
