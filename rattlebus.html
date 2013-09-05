@@ -43,7 +43,7 @@
         }
       });
 
-    App.service('Data', function ($rootScope, localStorageService) {
+    App.service('Data', function ($rootScope, localStorageService, $http) {
       // set up localdatastor
       var ls = localStorageService;
       ls.clearAll()
@@ -64,7 +64,11 @@
 
       return {
         uploadSegment: function (segment_id) {
-          return false
+          var data = {}
+          data.start_position = segments[segment_id].start_position
+          data.end_position = segments[segment_id].end_position
+          data.max_acceleration = Math.max.apply(null, segments[segment_id]);
+          $http.post("http://localhost:5000/record/99/segment", data)
         },
         _accel_len: function () {
           return this._accel().length
@@ -103,7 +107,7 @@
           console.log("end_pos: (" + segments[this._csid()].end_position.latitude + ", " + segments[this._csid()].end_position.longitude + ")")
           console.log("# measurements: " + this._accel_len())
           console.log("max acceleration this segment: " + this.getMaximumAcceleration())
-          //this.uploadSegment(this._csid())
+          this.uploadSegment(this._csid())
           currentSegmentId += 1
           segments[currentSegmentId] = new Segment()
           segments[currentSegmentId].start_position = curr_pos
