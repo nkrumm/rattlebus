@@ -20,7 +20,7 @@ def home():
     """
     Home Page for the RattleBus website
     """
-    return render_template("index.html")
+    return make_response(open('rattlebus.html').read())  # TOOD replace with send_file() in production
 
 
 @app.route('/record/<int:record_id>/segment', methods=['POST'])
@@ -29,7 +29,7 @@ def upload_segment(record_id=1):
     data.update({"record_id": record_id})
     g.rattlebus_db.insert(data)
     del data["_id"]
-    return make_response(jsonify(data))
+    return make_response(("ok", 200, []))
 
 
 @app.route('/record/<int:record_id>', methods=['GET'])

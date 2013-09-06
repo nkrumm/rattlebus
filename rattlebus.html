@@ -67,9 +67,15 @@
           var data = {}
           data.start_position = segments[segment_id].start_position
           data.end_position = segments[segment_id].end_position
-          data.max_acceleration = Math.max.apply(null, segments[segment_id]);
-          $http.post("http://localhost:5000/record/99/segment", data)
+          data.max_acceleration = Math.max.apply(null, segments[segment_id].acceleration_data);
+          var postrequest = $http.post("http://localhost:5000/record/99/segment", data)
+          postrequest.then(
+              function (response) {this.clearSegment(segment_id)}, // success
+              function (response) {console.log(response)}) // error
         },
+        clearSegment: function (segment_id) {
+          segments.splice(segment_id, 1)
+        }
         _accel_len: function () {
           return this._accel().length
         },
