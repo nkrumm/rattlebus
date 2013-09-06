@@ -3,8 +3,16 @@
 <title>the Rattlebus : View</title>
 </head>
 <body>
-{% for segment in segments %}
-	{{segment}} <br/>
-{% endfor %}
+  <table>
+    {% for segment in segments %}
+      <tr>
+        <td>({{segment.start_position["latitude"] | default(0) | round(5)}},
+            {{segment.start_position["longitude"] | default(0) | round(5)}})</td>
+        <td>({{segment.end_position["latitude"] | default(0) | round(5)}},
+            {{segment.end_position["longitude"] | default(0) | round(5)}})</td>
+        <td>{{segment.max_acceleration}}</td>
+      </tr>
+    {% endfor %}
+</table>
 </body>
 </html>
