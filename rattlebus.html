@@ -57,10 +57,21 @@
       var geolocationAvailable = navigator.geolocation ? true : false;
 
       // set up data struncture
-      var segments = new Array()
+      var segments = {}
       var currentSegmentId = 0;
-      console.log(currentSegmentId)
+      console.log("CSID: " + currentSegmentId)
       segments[currentSegmentId] = new Segment()
+      function clearSegment (segment_id) {
+          console.log("clearing segment id: " + segment_id )
+          delete segments[segment_id]
+          console.log(segments)
+      }
+      function incrementCSID(){
+        currentSegmentId += 1
+      }
+      function _csid(){
+        return currentSegmentId
+      }
 
       return {
         uploadSegment: function (segment_id) {
@@ -70,11 +81,8 @@
           data.max_acceleration = Math.max.apply(null, segments[segment_id].acceleration_data);
           var postrequest = $http.post("http://localhost:5000/record/99/segment", data)
           postrequest.then(
-              function (response) {this.clearSegment(segment_id)}, // on success, clear segment from local data array
+              function (response) {clearSegment(segment_id)}, // on success, clear segment from local data array
               function (response) {console.log(response)}) // error
-        },
-        clearSegment: function (segment_id) {
-          segments.splice(segment_id, 1)
         },
         _accel_len: function () {
           return this._accel().length
@@ -113,10 +121,13 @@
           console.log("end_pos: (" + segments[this._csid()].end_position.latitude + ", " + segments[this._csid()].end_position.longitude + ")")
           console.log("# measurements: " + this._accel_len())
           console.log("max acceleration this segment: " + this.getMaximumAcceleration())
-          this.uploadSegment(this._csid())
-          currentSegmentId += 1
-          segments[currentSegmentId] = new Segment()
-          segments[currentSegmentId].start_position = curr_pos
+          
+          incrementCSID()
+          
+          segments[_csid()] = new Segment()
+          segments[_csid()].start_position = curr_pos
+          segments[_csid()].acceleration_data.push(0)
+          console.log(segments)
           console.log("Total number of segments: " + segments.length)
 
 
@@ -152,11 +163,9 @@
             $window.clearInterval($scope.interval_id)
           } else {
             //$window.addEventListener("devicemotion",$scope.process_motion,false);
-            $scope.interval_id = $window.setInterval(function () {$scope.process_motion($scope.fakeRattle())}, 100)
+            $scope.interval_id = $window.setInterval(function () {$scope.process_motion($scope.fakeRattle())}, 50)
           }
           $rootScope.isRecording = !$rootScope.isRecording
-          
-
       }
     }); // end controller
     
@@ -192,7 +201,10 @@
       $scope.zoom = 15 // the zoom level
       
       $scope.process_position = function (position) {
-        $scope.$apply(function () { x = $scope.data.markPosition(position); })
+        $scope.$apply(function () {
+            x = $scope.data.markPosition(position);
+        })
+        $scope.data.uploadSegment($scope.data._csid() - 1)
         $scope.center = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
