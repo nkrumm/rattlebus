@@ -70,12 +70,12 @@
           data.max_acceleration = Math.max.apply(null, segments[segment_id].acceleration_data);
           var postrequest = $http.post("http://localhost:5000/record/99/segment", data)
           postrequest.then(
-              function (response) {this.clearSegment(segment_id)}, // success
+              function (response) {this.clearSegment(segment_id)}, // on success, clear segment from local data array
               function (response) {console.log(response)}) // error
         },
         clearSegment: function (segment_id) {
           segments.splice(segment_id, 1)
-        }
+        },
         _accel_len: function () {
           return this._accel().length
         },
@@ -124,7 +124,7 @@
       }
     }); // end factory // Data
 
-    App.controller("StatsViewer", function ($scope, $window, Data) {
+    App.controller("StatsViewer", function ($scope, $rootScope, $window, Data) {
       $scope.data = Data
       $scope.process_motion = function (event){
         $scope.$apply(
@@ -137,7 +137,7 @@
         );
       }
 
-      $scope.isRecording = false
+      $rootScope.isRecording = false
 
       // MOCK FOR TESTING ON DESKTOP ONLY
       $scope.previous_rattle = 0
@@ -147,14 +147,14 @@
       }
 
       $scope.toggleRecording = function () {
-          if ($scope.isRecording){
+          if ($rootScope.isRecording){
             //$window.removeEventListener("devicemotion", $scope.process_motion, false);
             $window.clearInterval($scope.interval_id)
           } else {
             //$window.addEventListener("devicemotion",$scope.process_motion,false);
             $scope.interval_id = $window.setInterval(function () {$scope.process_motion($scope.fakeRattle())}, 100)
           }
-          $scope.isRecording = !$scope.isRecording
+          $rootScope.isRecording = !$rootScope.isRecording
       }
     }); // end controller
     
@@ -180,7 +180,7 @@
                   .y(function(d, i) { return $scope.y(d); });
     }); // end controller
 
-    App.controller("Map", function ($scope, $window, Data){
+    App.controller("Map", function ($scope, $rootScope, $window, Data){
       $scope.data = Data
       $scope.center = {
         latitude: 0, // initial map center latitude
@@ -205,7 +205,11 @@
           timeout: 5000,
           maximumAge: 5000
       };
-      //watcher = navigator.geolocation.watchPosition($scope.process_position, function () {return false}, watcherOptions);
+      //if ($rootScope.isRecording){
+      //  watcher = navigator.geolocation.watchPosition($scope.process_position, function () {return false}, watcherOptions);
+      //} else {
+      //  navigator.geolocation.clearWatch(watcher)
+      //}
 
       // MOCK MODE
       $scope.previous_lat =  48.6398716
@@ -217,8 +221,14 @@
                 }
         return p
       }
-      $window.setInterval(function () {$scope.process_position($scope.fakePosition())}, 10000)
-
+      
+      var interval_id
+      // This needs to be set up to sync when the variable changes!
+      if ($rootScope.isRecording){
+        interval_id = $window.setInterval(function () {$scope.process_position($scope.fakePosition())}, 10000)
+      } else {
+        $window.clearInterval(interval_id)
+      }
       // for some reason this has to be included as a json-string in the directive below. :(
       // $scope.mopts = {
       //   disableDefaultUI: true,
