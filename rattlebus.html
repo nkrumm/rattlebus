@@ -30,9 +30,10 @@
       false
     );
     function Segment(){
-        this.start_position = new google.maps.LatLng(),
-        this.end_position = new google.maps.LatLng(),
+        this.start_position = new google.maps.LatLng()
+        this.end_position = new google.maps.LatLng()
         this.acceleration_data = new Array()
+        this.is_uploaded = false;
     }
     
     var App = angular.module("App", ["angular-gestures","google-maps","LocalStorageModule"]);
@@ -59,21 +60,28 @@
       // set up data struncture
       var segments = {}
       var currentSegmentId = 0;
+      
+      // send k segments at a time
+      var num_segments_to_send = 2;
+
       console.log("CSID: " + currentSegmentId)
       segments[currentSegmentId] = new Segment()
+
       function clearSegment (segment_id) {
           console.log("clearing segment id: " + segment_id )
           delete segments[segment_id]
           console.log(segments)
       }
       function incrementCSID(){
-        currentSegmentId += 1
+        currentSegmentId++
+        console.log("CSID is now: " + currentSegmentId)
       }
       function _csid(){
         return currentSegmentId
       }
 
       return {
+        num_segments_to_send: num_segments_to_send,
         uploadSegment: function (segment_id) {
           var data = {}
           data.start_position = segments[segment_id].start_position
@@ -81,7 +89,9 @@
           data.max_acceleration = Math.max.apply(null, segments[segment_id].acceleration_data);
           var postrequest = $http.post("http://localhost:5000/record/99/segment", data)
           postrequest.then(
-              function (response) {clearSegment(segment_id)}, // on success, clear segment from local data array
+              function (response) { // on success, clear segment from local data array
+                clearSegment(segment_id)
+              },
               function (response) {console.log(response)}) // error
         },
         _accel_len: function () {
@@ -94,6 +104,22 @@
         _accel: function () {
           // return entire current frame of acceleration data
           return segments[this._csid()].acceleration_data
+        },
+        getAllSegmentIds: function () {
+          keys = []
+          for (var key in segments) {
+            if (segments.hasOwnProperty(key))
+                keys.push(parseInt(key))
+          }
+          return keys
+        },
+        getSegmentCount: function () {
+          var count = 0;
+          console.log(this.getAllSegmentIds())
+          for (var key in this.getAllSegmentIds()) {
+            count++;
+          }
+          return count;
         },
         getCurrentAcceleration: function () {
           // return last recorded value
@@ -128,9 +154,7 @@
           segments[_csid()].start_position = curr_pos
           segments[_csid()].acceleration_data.push(0)
           console.log(segments)
-          console.log("Total number of segments: " + segments.length)
-
-
+          console.log("Total number of stored segments: " + this.getSegmentCount())
         }
       }
     }); // end factory // Data
@@ -201,10 +225,21 @@
       $scope.zoom = 15 // the zoom level
       
       $scope.process_position = function (position) {
-        $scope.$apply(function () {
-            x = $scope.data.markPosition(position);
-        })
-        $scope.data.uploadSegment($scope.data._csid() - 1)
+        //$scope.$apply(function () {
+        $scope.data.markPosition(position);
+        //})
+        if ($scope.data.getSegmentCount() >= $scope.data.num_segments_to_send){
+          var segments_to_upload = $scope.data.getAllSegmentIds();
+          for (var s in segments_to_upload){
+            id = segments_to_upload[s]
+            console.log(id)
+            console.log($scope.data._csid())
+            if (id != $scope.data._csid()){
+              console.log("uploading segment_id " + id)
+              $scope.data.uploadSegment(id)
+            }
+          }
+        }
         $scope.center = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
