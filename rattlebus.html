@@ -171,7 +171,7 @@
           }
         );
       }
-
+      $rootScope.isMockMode = true
       $rootScope.isRecording = false
 
       // MOCK FOR TESTING ON DESKTOP ONLY
@@ -183,13 +183,23 @@
 
       $scope.toggleRecording = function () {
           if ($rootScope.isRecording){
-            //$window.removeEventListener("devicemotion", $scope.process_motion, false);
-            $window.clearInterval($scope.interval_id)
+            if ($rootScope.isMockMode) {
+              $window.clearInterval($scope.interval_id)
+            } else {
+              $window.removeEventListener("devicemotion", $scope.process_motion, false);
+            }
           } else {
-            //$window.addEventListener("devicemotion",$scope.process_motion,false);
-            $scope.interval_id = $window.setInterval(function () {$scope.process_motion($scope.fakeRattle())}, 50)
+            if ($rootScope.isMockMode){
+              $scope.interval_id = $window.setInterval(function () {$scope.process_motion($scope.fakeRattle())}, 50)
+            } else {
+              $window.addEventListener("devicemotion",$scope.process_motion,false);
+            }
           }
           $rootScope.isRecording = !$rootScope.isRecording
+      }
+      $scope.toggleMockMode = function () {
+        $rootScope.isMockMode = !$rootScope.isMockMode
+        console.log($rootScope.isMockMode)
       }
     }); // end controller
     
@@ -232,8 +242,6 @@
           var segments_to_upload = $scope.data.getAllSegmentIds();
           for (var s in segments_to_upload){
             id = segments_to_upload[s]
-            console.log(id)
-            console.log($scope.data._csid())
             if (id != $scope.data._csid()){
               console.log("uploading segment_id " + id)
               $scope.data.uploadSegment(id)
@@ -244,7 +252,6 @@
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         }
-
       }
 
       var watcher, options, initialized
@@ -254,11 +261,6 @@
           timeout: 5000,
           maximumAge: 5000
       };
-      //if ($rootScope.isRecording){
-      //  watcher = navigator.geolocation.watchPosition($scope.process_position, function () {return false}, watcherOptions);
-      //} else {
-      //  navigator.geolocation.clearWatch(watcher)
-      //}
 
       // MOCK MODE
       $scope.previous_lat =  48.6398716
@@ -275,9 +277,17 @@
       // This needs to be set up to sync when the variable changes!
       $rootScope.$watch("isRecording", function () {
         if ($rootScope.isRecording){
-          interval_id = $window.setInterval(function () {$scope.process_position($scope.fakePosition())}, 10000)
+          if ($rootScope.isMockMode) {
+            interval_id = $window.setInterval(function () {$scope.process_position($scope.fakePosition())}, 10000)
+          } else {
+            watcher = navigator.geolocation.watchPosition($scope.process_position, function () {return false}, watcherOptions);  
+          }
         } else {
-          $window.clearInterval(interval_id)
+          if ($rootScope.isMockMode) {
+            navigator.geolocation.clearWatch(watcher)
+          } else {
+            $window.clearInterval(interval_id)
+          }
         }
       }) // end watch
       // for some reason this has to be included as a json-string in the directive below. :(
@@ -435,7 +445,7 @@
         <!-- <button type='button' class='btn btn-success btn-large' ng-click='toggleRecording()'>Start Recording</button> -->
         <button class="btn btn-large" ng-class="{true: 'btn-success', false: 'btn-danger'}[!isRecording]" ng-click="toggleRecording()">
           {{!isRecording && 'Start' || 'Stop'}} Recording</button>
-
+        <input type="checkbox" ng-model='isMockMode' ng-change='toggleMockMode()'/> Mock Mode
       </div>
     </div>
     </div>
