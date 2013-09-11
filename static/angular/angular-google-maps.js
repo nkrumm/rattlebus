@@ -4075,6 +4075,7 @@ MarkerWithLabel.prototype.setMap = function (theMap) {
                             oldArray.setAt(i,new google.maps.LatLng(newValue.latitude, newValue.longitude));
                         }
                     }
+
                     for(; i < newLength; i++){
                         newValue = newArray[i];
                         oldArray.push(new google.maps.LatLng(newValue.latitude, newValue.longitude));
@@ -4082,8 +4083,9 @@ MarkerWithLabel.prototype.setMap = function (theMap) {
                     for(; i < oldLength; i++){
                         oldArray.pop();
                     }
+                    // Crazy hack for now
+                    if (newArray.length > oldArray.getLength()) {newArray.pop()}
                 }
-
             }, true);
 
             return function(){
@@ -4968,7 +4970,6 @@ angular.module("google-maps")
                     if (isTrue(attrs.fit)) {
                         extendMapBounds(map, pathPoints);
                     }
-
                     if(angular.isDefined(scope.editable)) {
                         scope.$watch('editable',function(newValue,oldValue){
                             polyline.setEditable(newValue);
