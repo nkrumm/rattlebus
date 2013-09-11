@@ -14,6 +14,7 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIGe5unWNEDISu8fKc27k_vZBQhomjZrU&sensor=true"></script>
     <!-- AngularJS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.2/angular.min.js"></script>-->
     <script src="/static/angular/gestures.min.js"></script>
     <script src="/static/angular/angular-google-maps.js"></script>
     <script src="/static/angular/angular-local-storage.js"></script>
@@ -185,12 +186,14 @@
           if ($rootScope.isRecording){
             if ($rootScope.isMockMode) {
               $window.clearInterval($scope.interval_id)
+              console.log("clearing mock rattle")
             } else {
               $window.removeEventListener("devicemotion", $scope.process_motion, false);
             }
           } else {
             if ($rootScope.isMockMode){
               $scope.interval_id = $window.setInterval(function () {$scope.process_motion($scope.fakeRattle())}, 50)
+              console.log("starting mock rattle")
             } else {
               $window.addEventListener("devicemotion",$scope.process_motion,false);
             }
@@ -228,16 +231,14 @@
     App.controller("Map", function ($scope, $rootScope, $window, Data){
       $scope.data = Data
       $scope.center = {
-        latitude: 0, // initial map center latitude
-        longitude: 0, // initial map center longitude
+        latitude: 45, // initial map center latitude
+        longitude: -112, // initial map center longitude
       }
-      $scope.markers = [] // an array of markers,
+      $scope.path = [{latitude: 48.64711180078778, longitude: -113.874208},
+                     {latitude: 48.64711180078778, longitude: -114.74208}] // an array of pa,
       $scope.zoom = 15 // the zoom level
-      
       $scope.process_position = function (position) {
-        //$scope.$apply(function () {
         $scope.data.markPosition(position);
-        //})
         if ($scope.data.getSegmentCount() >= $scope.data.num_segments_to_send){
           var segments_to_upload = $scope.data.getAllSegmentIds();
           for (var s in segments_to_upload){
@@ -252,9 +253,16 @@
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         }
+        
+        $scope.path.push({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        })
+
+        console.log($scope.path)
       }
 
-      var watcher, options
+      var watcher, watcherOptions
       watcherOptions = {
           enableHighAccuracy: true,
           timeout: 5000,
@@ -266,7 +274,7 @@
       $scope.fakePosition = function () {
         var p = {coords: {
                     latitude: $scope.previous_lat + (Math.random()/10), 
-                    longitude: -113.8742082
+                    longitude: -113.8742082 + (Math.random()/10)
                   }
                 }
         return p
@@ -278,14 +286,16 @@
         if ($rootScope.isRecording){
           if ($rootScope.isMockMode) {
             interval_id = $window.setInterval(function () {$scope.process_position($scope.fakePosition())}, 10000)
+            console.log("starting mock geolocation")
           } else {
             watcher = navigator.geolocation.watchPosition($scope.process_position, function () {return false}, watcherOptions);  
           }
         } else {
           if ($rootScope.isMockMode) {
-            navigator.geolocation.clearWatch(watcher)
-          } else {
             $window.clearInterval(interval_id)
+            console.log("clearing mock geolocation")
+          } else {
+            navigator.geolocation.clearWatch(watcher)
           }
         }
       }) // end watch
@@ -294,6 +304,10 @@
       //   disableDefaultUI: true,
       //   mapTypeId: google.maps.MapTypeId.ROADMAP
       // }
+      $scope.stroke = {
+        color: '#000000',
+        weight: 3
+      }
     }); // end controller
 
     App.controller("Slider", function ($scope){
@@ -424,8 +438,14 @@
       </div>
       <div class='panel shaded' hm-swipe-right="slide(0)" hm-swipe-left="slide(-2)">
         <div ng-controller='Map'>
-            <google-map id="map" center="center" options='{"mapTypeId": "google.maps.MapTypeId.ROADMAP", "disableDefaultUI": "true"}' draggable="false" zoom="zoom" markers="markers" mark-click="false"></google-map>
-
+            <div class='google-map'
+                 center="center"
+                 events="events"
+                 draggable="false"
+                 zoom="zoom"
+                 mark-click="false">
+            <polyline path="path" stroke="stroke" fit="true" />
+          </div>
         </div>
       </div>
       <div class='panel shaded' hm-swipe-right="slide(-1)">
