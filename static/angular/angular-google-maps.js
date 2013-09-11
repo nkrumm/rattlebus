@@ -4695,7 +4695,7 @@ angular.module("google-maps")
                     var pathPoints = convertPathPoints(scope.path);
 
 
-                    console.log(pathPoints)
+
                     var opts = angular.extend({}, DEFAULTS, {
                         map: map,
                         path: pathPoints,
