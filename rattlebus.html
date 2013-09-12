@@ -231,12 +231,12 @@
     App.controller("Map", function ($scope, $rootScope, $window, Data){
       $scope.data = Data
       $scope.center = {
-        latitude: 45, // initial map center latitude
-        longitude: -112, // initial map center longitude
+        latitude: 48, // initial map center latitude
+        longitude: -113, // initial map center longitude
       }
-      $scope.path = [{latitude: 48.64711180078778, longitude: -113.874208},
-                     {latitude: 48.64711180078778, longitude: -114.74208}] // an array of pa,
+      $scope.path = [$scope.center]
       $scope.zoom = 15 // the zoom level
+      
       $scope.process_position = function (position) {
         $scope.data.markPosition(position);
         if ($scope.data.getSegmentCount() >= $scope.data.num_segments_to_send){

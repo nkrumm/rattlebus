@@ -4062,6 +4062,7 @@ MarkerWithLabel.prototype.setMap = function (theMap) {
 
             var watchListener =  scope.$watch(pathEval, function (newArray) {
                 var oldArray = mapArray;
+                console.log("in watcher")
                 if (newArray) {
                     var i = 0;
                     var oldLength = oldArray.getLength();
@@ -4920,24 +4921,17 @@ angular.module("google-maps")
                 // Validate required properties
                 if (angular.isUndefined(scope.path) ||
                     scope.path === null ||
-                    scope.path.length < 2 ||
+                    //scope.path.length < 2 ||
                     !validatePathPoints(scope.path)) {
-
                     $log.error("polyline: no valid path attribute found");
                     return;
                 }
-
 
                 // Wrap polyline initialization inside a $timeout() call to make sure the map is created already
                 $timeout(function () {
                     var map = mapCtrl.getMap();
 
-
-
-
                     function buildOpts (pathPoints){
-
-
                         var opts = angular.extend({}, DEFAULTS, {
                             map: map,
                             path: pathPoints,
@@ -4945,8 +4939,6 @@ angular.module("google-maps")
                             strokeOpacity: scope.stroke && scope.stroke.opacity,
                             strokeWeight: scope.stroke && scope.stroke.weight
                         });
-
-
                         angular.forEach({
                             clickable:true,
                             draggable:false,
@@ -4966,9 +4958,10 @@ angular.module("google-maps")
                     }
                     var pathPoints = convertPathPoints(scope.path)
                     var polyline = new google.maps.Polyline(buildOpts(pathPoints));
-
                     if (isTrue(attrs.fit)) {
-                        extendMapBounds(map, pathPoints);
+                      if (!angular.isUndefined(pathPoints)) {
+                          extendMapBounds(map, pathPoints);
+                        }
                     }
                     if(angular.isDefined(scope.editable)) {
                         scope.$watch('editable',function(newValue,oldValue){
