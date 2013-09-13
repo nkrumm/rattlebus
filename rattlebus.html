@@ -77,10 +77,6 @@
         currentSegmentId++
         console.log("CSID is now: " + currentSegmentId)
       }
-      function _csid(){
-        return currentSegmentId
-      }
-
       return {
         num_segments_to_send: num_segments_to_send,
         uploadSegment: function (segment_id) {
@@ -88,7 +84,7 @@
           data.start_position = segments[segment_id].start_position
           data.end_position = segments[segment_id].end_position
           data.max_acceleration = Math.max.apply(null, segments[segment_id].acceleration_data);
-          var postrequest = $http.post("http://localhost:5000/record/99/segment", data)
+          var postrequest = $http.post("/record/99/segment", data)
           postrequest.then(
               function (response) { // on success, clear segment from local data array
                 clearSegment(segment_id)
@@ -151,9 +147,9 @@
           
           incrementCSID()
           
-          segments[_csid()] = new Segment()
-          segments[_csid()].start_position = curr_pos
-          segments[_csid()].acceleration_data.push(0)
+          segments[this._csid()] = new Segment()
+          segments[this._csid()].start_position = curr_pos
+          segments[this._csid()].acceleration_data.push(0)
           console.log(segments)
           console.log("Total number of stored segments: " + this.getSegmentCount())
         }
@@ -236,7 +232,7 @@
       }
       $scope.path = [$scope.center]
       $scope.zoom = 15 // the zoom level
-      
+
       $scope.process_position = function (position) {
         $scope.data.markPosition(position);
         if ($scope.data.getSegmentCount() >= $scope.data.num_segments_to_send){
@@ -285,6 +281,7 @@
       $rootScope.$watch("isRecording", function () {
         if ($rootScope.isRecording){
           if ($rootScope.isMockMode) {
+            $scope.process_position($scope.fakePosition())
             interval_id = $window.setInterval(function () {$scope.process_position($scope.fakePosition())}, 10000)
             console.log("starting mock geolocation")
           } else {
@@ -300,10 +297,10 @@
         }
       }) // end watch
       // for some reason this has to be included as a json-string in the directive below. :(
-      // $scope.mopts = {
-      //   disableDefaultUI: true,
-      //   mapTypeId: google.maps.MapTypeId.ROADMAP
-      // }
+      $scope.opts = {
+        disableDefaultUI: true,
+        type: google.maps.MapTypeId.ROADMAP
+      }
       $scope.stroke = {
         color: '#000000',
         weight: 3
@@ -443,7 +440,8 @@
                  events="events"
                  draggable="false"
                  zoom="zoom"
-                 mark-click="false">
+                 mark-click="false"
+                 options="opts">
             <polyline path="path" stroke="stroke" fit="true" />
           </div>
         </div>
