@@ -9,6 +9,19 @@ body {
   color: #333333;
   background-color: #ffffff;
 }
+a {
+  cursor: pointer;
+}
+#settings-modal {
+  width: 280px;
+  height: 80%;
+  left:10px;
+  top: 20px;
+  position: absolute;
+  background-color: white;
+  border: solid 1px black;
+  padding: 5px;
+}
 .red {color: red;}
 .blue {color: blue;}
 .hbar {

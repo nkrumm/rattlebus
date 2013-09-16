@@ -3,11 +3,12 @@
   <head>
     <title>Rattlebus</title>
 
-    <!-- Bootstrap -->
-    <!--<link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">-->
+    
     <meta name="viewport" content="width=320.1, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Bootstrap -->
+    <!--<link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">-->
     <!-- D3 -->
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <!-- Google Maps -->
@@ -18,7 +19,7 @@
     <script src="/static/angular/gestures.min.js"></script>
     <script src="/static/angular/angular-google-maps.js"></script>
     <script src="/static/angular/angular-local-storage.js"></script>
-    <script src="/static/angular/angular-ui-modal.js"></script>
+    <script src="/static/angular/angular-ui.js"></script>
     <!-- styles -->
     <link href="/static/chart.css" rel="stylesheet" media="screen">
     <link href="/static/main.css" rel="stylesheet" media="screen">
@@ -40,7 +41,7 @@
         this.is_uploaded = false;
     }
     
-    var App = angular.module("App", ["angular-gestures","google-maps","LocalStorageModule"]);
+    var App = angular.module("App", ["angular-gestures","google-maps","LocalStorageModule", "ui.bootstrap"]);
 
     App.filter("round", function (){
         return function (number, to_digits){
@@ -310,20 +311,40 @@
       }
     }); // end controller
 
+    App.controller("SettingsInstanceCtrl", function ($scope, $modalInstance) {
+      $scope.close = function () {
+        $modalInstance.close();
+      };
+    }); 
     App.controller("Settings", function ($scope, $modal, Data) {
-
+      $scope.openSettings = function () {
+        console.log("settings")
+        var modalInstance = $modal.open({
+          templateUrl: "settingsModal.html",
+          controller:"SettingsInstanceCtrl"
+        })
+      }
     }); // end controller
+
+
     </script>
     <script src="/static/app/controllers.js" type="text/javascript"></script>
   </head>
   <body>
+    <div ng-app="App">
     <div class='panel'>
       <img id='headerlogo' src='static/logo.png'/>
       <div class='pull-right' ng-controller="Settings">
-        <i class="icon-cogs icon-large"></i>
+            <script type="text/ng-template" id="settingsModal.html">
+            <div id='settings-modal'>
+              <h2 style='text-align: center'> Settings </h2>
+              <button ng-click='close()'>Close</button>
+            </div>
+            </script>
+        <a ng-click="openSettings()"><i class="icon-cogs icon-large"></i></a> 
       </div>
     </div>
-    <div ng-app="App">
+    
       <div ng-controller='StatsViewer'>
         <div class='panel shaded'>
           <div class='statcontainer'>
