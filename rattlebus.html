@@ -18,9 +18,12 @@
     <script src="/static/angular/gestures.min.js"></script>
     <script src="/static/angular/angular-google-maps.js"></script>
     <script src="/static/angular/angular-local-storage.js"></script>
+    <script src="/static/angular/angular-ui-modal.js"></script>
     <!-- styles -->
     <link href="/static/chart.css" rel="stylesheet" media="screen">
     <link href="/static/main.css" rel="stylesheet" media="screen">
+    <!-- font awesome -->
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
 
     <script>
     document.addEventListener(
@@ -307,11 +310,19 @@
       }
     }); // end controller
 
+    App.controller("Settings", function ($scope, $modal, Data) {
+
+    }); // end controller
     </script>
     <script src="/static/app/controllers.js" type="text/javascript"></script>
   </head>
   <body>
-    <div class='panel centered'><img src='static/logo.png' width="50%" /></div>
+    <div class='panel'>
+      <img id='headerlogo' src='static/logo.png'/>
+      <div class='pull-right' ng-controller="Settings">
+        <i class="icon-cogs icon-large"></i>
+      </div>
+    </div>
     <div ng-app="App">
       <div ng-controller='StatsViewer'>
         <div class='panel shaded'>

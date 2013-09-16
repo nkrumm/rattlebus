@@ -46,6 +46,7 @@ body {
 .panel {
   padding: 5px;
   margin: 5px;
+  width: 300px;
 }
 .panel.shaded {
   background-color: #ddd;
@@ -56,6 +57,9 @@ body {
   text-align: center;
 }
 
+.pull-right {
+  float: right;
+}
 #sliderbox-container {
   overflow: hidden;
   width: 300px;
@@ -73,6 +77,11 @@ body {
 #sliderbox-slider .panel{
   float: left;
   width: 300px;
+}
+
+#headerlogo {
+  margin-left: 60px;
+   width: 180px;
 }
 
 #map {
