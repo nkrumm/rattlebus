@@ -329,18 +329,19 @@
 
     </script>
     <script src="/static/app/controllers.js" type="text/javascript"></script>
+    <script src="/static/app/directives.js" type="text/javascript"></script>
   </head>
   <body>
     <div ng-app="App">
     <div class='panel'>
       <img id='headerlogo' src='static/logo.png'/>
       <div class='pull-right' ng-controller="Settings">
-            <script type="text/ng-template" id="settingsModal.html">
-            <div id='settings-modal'>
-              <h2 style='text-align: center'> Settings </h2>
-              <button ng-click='close()'>Close</button>
-            </div>
-            </script>
+        <script type="text/ng-template" id="settingsModal.html">
+          <div id='settings-modal'>
+            <h2 style='text-align: center'> Settings </h2>
+            <button ng-click='close()'>Close</button>
+          </div>
+        </script>
         <a ng-click="openSettings()"><i class="icon-cogs icon-large"></i></a> 
       </div>
     </div>
