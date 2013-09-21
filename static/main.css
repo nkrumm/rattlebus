@@ -14,14 +14,14 @@ a {
   cursor: pointer;
 }
 #settings-modal {
-  width: 287px;
+  width: 263px;
   height: 200px;
   left:10px;
   top: 20px;
   position: absolute;
   background-color: white;
   border: solid 1px black;
-  padding: 5px;
+  padding: 15px;
 }
 .red {color: red;}
 .blue {color: blue;}
@@ -95,11 +95,6 @@ a {
 #sliderbox-slider .panel{
   float: left;
   width: 300px;
-}
-
-#headerlogo {
-  margin-left: 60px;
-   width: 180px;
 }
 
 #map {

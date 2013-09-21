@@ -49,6 +49,16 @@
         }
       });
 
+    App.service('User', function($rootScope) {
+      var username = "test"
+      return {
+        username: username,
+        setUserName: function (username) {
+          this.username = username
+        }
+      }
+    }); // end User service
+
     App.service('Data', function ($rootScope, localStorageService, $http) {
       // set up localdatastor
       var ls = localStorageService;
@@ -235,7 +245,7 @@
         longitude: -113, // initial map center longitude
       }
       $scope.path = [$scope.center]
-      $scope.zoom = 15 // the zoom level
+      $scope.zoom = 2 // the zoom level
 
       $scope.process_position = function (position) {
         $scope.data.markPosition(position);
@@ -311,18 +321,27 @@
       }
     }); // end controller
 
-    App.controller("SettingsInstanceCtrl", function ($scope, $modalInstance) {
-      $scope.close = function () {
-        $modalInstance.close();
+    App.controller("SettingsInstanceCtrl", function ($scope, $modalInstance, username) {
+      $scope.form = {"username" : username}
+      $scope.save = function () {
+        $modalInstance.close($scope.form.username);
       };
     }); 
-    App.controller("Settings", function ($scope, $modal, Data) {
+    App.controller("Settings", function ($scope, $modal, User) {
       $scope.openSettings = function () {
-        console.log("settings")
+        $scope.username = User.username
         var modalInstance = $modal.open({
           templateUrl: "settingsModal.html",
-          controller:"SettingsInstanceCtrl"
+          controller: "SettingsInstanceCtrl",
+          resolve: {
+            username: function () {return $scope.username}
+          }
         })
+        modalInstance.result.then(function (result){
+          $scope.username = result
+          console.log("Set new username: " + $scope.username)
+          User.setUserName($scope.username)
+        }, function () {console.log("canceled!")})
       }
     }); // end controller
 
@@ -338,8 +357,11 @@
       <div class='pull-right' ng-controller="Settings">
         <script type="text/ng-template" id="settingsModal.html">
           <div id='settings-modal'>
-            <h2 style='text-align: center'> Settings </h2>
-            <div class='panel centered'> <button class='btn' ng-click='close()'>Close</button></div>
+            <h2 style='text-align: center'>Settings</h2>
+            username: <input type="text" name="username" ng-model="form.username">
+            <div class='panel centered'>
+              <button class='btn' ng-click='save()'>Close</button>
+            </div>
           </div>
         </script>
         <a ng-click="openSettings()"><i class="icon-cogs icon-large"></i></a> 
