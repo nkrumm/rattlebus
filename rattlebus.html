@@ -59,7 +59,7 @@
       }
     }); // end User service
 
-    App.service('Data', function ($rootScope, localStorageService, $http) {
+    App.service('Data', function ($rootScope, localStorageService, User, $http) {
       // set up localdatastor
       var ls = localStorageService;
       ls.clearAll()
@@ -98,6 +98,7 @@
           data.start_position = segments[segment_id].start_position
           data.end_position = segments[segment_id].end_position
           data.max_acceleration = Math.max.apply(null, segments[segment_id].acceleration_data);
+          data.username = User.username
           var postrequest = $http.post("/record/99/segment", data)
           postrequest.then(
               function (response) { // on success, clear segment from local data array
@@ -422,7 +423,7 @@
     </div>
     </div>
     <!-- JavaScript plugins (requires jQuery) -->
-    <script src="http://code.jquery.com/jquery.js"></script>
+    <!--<script src="http://code.jquery.com/jquery.js"></script>-->
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <!--<script src="static/bootstrap/js/bootstrap.min.js"></script>     -->
   </body>

@@ -71,15 +71,15 @@ App.directive("hbar", function (){
       scope.$watch("value", function(newval){
         if (newval){
           newval =  parseFloat(newval)
-          width = newval * 10  + 10
+          width = Math.abs(newval) * 10  + 10
           if (width > attrs.maxWidth){
             width = attrs.maxWidth;
           }
-          $(element).attr("width", width);
+          angular.element(element).css("width",width + "px");
           if (newval > parseFloat(attrs.highlight)){
-            $(element).addClass(attrs.highlightClass);
+            angular.element(element).addClass(attrs.highlightClass);
           } else {
-            $(element).removeClass(attrs.highlightClass);
+            angular.element(element).removeClass(attrs.highlightClass);
           }
         }
       }); // end scope
