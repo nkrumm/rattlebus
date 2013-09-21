@@ -50,7 +50,7 @@
       });
 
     App.service('User', function($rootScope) {
-      var username = "test"
+      var username = "Anonymous"
       return {
         username: username,
         setUserName: function (username) {
@@ -328,8 +328,8 @@
       };
     }); 
     App.controller("Settings", function ($scope, $modal, User) {
+      $scope.username = User.username
       $scope.openSettings = function () {
-        $scope.username = User.username
         var modalInstance = $modal.open({
           templateUrl: "settingsModal.html",
           controller: "SettingsInstanceCtrl",
@@ -352,10 +352,10 @@
   </head>
   <body>
     <div ng-app="App" id='main-container'>
-    <div class='panel centered'>
-      <img width="180px" src='static/logo.png'/>
-      <div class='pull-right' ng-controller="Settings">
-        <script type="text/ng-template" id="settingsModal.html">
+      <div ng-controller="Settings">
+      <div id='header-bar'>Hello, <a ng-click="openSettings()">{{username}}</a> !
+      </div>
+      <script type="text/ng-template" id="settingsModal.html">
           <div id='settings-modal'>
             <h2 style='text-align: center'>Settings</h2>
             username: <input type="text" name="username" ng-model="form.username">
@@ -363,11 +363,11 @@
               <button class='btn' ng-click='save()'>Close</button>
             </div>
           </div>
-        </script>
-        <a ng-click="openSettings()"><i class="icon-cogs icon-large"></i></a> 
-      </div>
+        </script>    
     </div>
-    
+    <div class='panel centered'>
+        <img width="180px" src='static/logo.png'/>
+    </div>    
       <div ng-controller='StatsViewer'>
         <div class='panel shaded'>
           <div class='statcontainer'>

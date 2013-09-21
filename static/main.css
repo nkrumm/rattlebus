@@ -1,6 +1,5 @@
 body {
   margin: 0px;
-  margin-top: 20px;
   padding: 0px;
   border: 0px;
   width: 320px;
@@ -12,6 +11,8 @@ body {
 }
 a {
   cursor: pointer;
+  color: rgb(111, 122, 247);
+  text-decoration: underline;
 }
 #settings-modal {
   width: 263px;
@@ -23,6 +24,17 @@ a {
   border: solid 1px black;
   padding: 15px;
 }
+
+#header-bar {
+  text-align: right;
+  padding: 0px;
+  margin-top: 3px;
+  font-size: 10pt;
+}
+#header-bar a {
+  font-weight: bold;
+}
+
 .red {color: red;}
 .blue {color: blue;}
 .hbar {
