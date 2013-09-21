@@ -3,6 +3,7 @@ body {
   margin-top: 20px;
   padding: 0px;
   border: 0px;
+  width: 320px;
   font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
   font-size: 14px;
   line-height: 20px;
@@ -13,8 +14,8 @@ a {
   cursor: pointer;
 }
 #settings-modal {
-  width: 280px;
-  height: 80%;
+  width: 287px;
+  height: 200px;
   left:10px;
   top: 20px;
   position: absolute;
@@ -59,7 +60,6 @@ a {
 .panel {
   padding: 5px;
   margin: 5px;
-  width: 300px;
 }
 .panel.shaded {
   background-color: #ddd;
@@ -73,9 +73,14 @@ a {
 .pull-right {
   float: right;
 }
+.pull-down {
+  position: absolute;
+  bottom: 10px;
+}
+
 #sliderbox-container {
   overflow: hidden;
-  width: 300px;
+  width: 320px;
   height: 150px;
   margin: 0;
 }

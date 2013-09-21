@@ -211,8 +211,8 @@
       var random = d3.random.normal(0, .2);
       $scope.chartdata = d3.range($scope.n).map(random);
 
-      $scope.margin = {top: 2, right: 5, bottom: 2, left: 0}
-      $scope.width = 275 - $scope.margin.left - $scope.margin.right,
+      $scope.margin = {top: 2, right: 20, bottom: 2, left: 0}
+      $scope.width = 320 - $scope.margin.left - $scope.margin.right,
       $scope.height = 100 - $scope.margin.top - $scope.margin.bottom;
 
       $scope.x = d3.scale.linear()
@@ -332,14 +332,14 @@
     <script src="/static/app/directives.js" type="text/javascript"></script>
   </head>
   <body>
-    <div ng-app="App">
+    <div ng-app="App" id='main-container'>
     <div class='panel'>
       <img id='headerlogo' src='static/logo.png'/>
       <div class='pull-right' ng-controller="Settings">
         <script type="text/ng-template" id="settingsModal.html">
           <div id='settings-modal'>
             <h2 style='text-align: center'> Settings </h2>
-            <button ng-click='close()'>Close</button>
+            <div class='panel centered'> <button class='btn' ng-click='close()'>Close</button></div>
           </div>
         </script>
         <a ng-click="openSettings()"><i class="icon-cogs icon-large"></i></a> 
@@ -388,10 +388,10 @@
         I am the FFT!
       </div>
       </div>
-      <div class='panel centered'>
+      <!--<div class='panel centered'>
         <button ng-click="slide(0)">Real-Time view</button> 
         <button ng-click="slide(-1)">Map view</button>
-      </div>
+      </div>-->
 
     </div>
 
