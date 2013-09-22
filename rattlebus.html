@@ -25,7 +25,8 @@
     <link href="/static/main.css" rel="stylesheet" media="screen">
     <!-- font awesome -->
     <!--<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">-->
-
+    <!-- crytoJS md5 function -->
+    <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
     <script>
     document.addEventListener(
       'touchmove',
@@ -64,6 +65,9 @@
       var ls = localStorageService;
       ls.clearAll()
 
+      // set up record id
+      var record_id
+
       // set up acceleration measurements
       var rolling_interval = 50;
       var rattle_trigger = 10;
@@ -91,6 +95,9 @@
         currentSegmentId++
         console.log("CSID is now: " + currentSegmentId)
       }
+      function getNewRecordHash(){
+        return CryptoJS.MD5(new Date().toString() + User.username).toString().slice(0,10)
+      }
       return {
         num_segments_to_send: num_segments_to_send,
         uploadSegment: function (segment_id) {
@@ -99,7 +106,7 @@
           data.end_position = segments[segment_id].end_position
           data.max_acceleration = Math.max.apply(null, segments[segment_id].acceleration_data);
           data.username = User.username
-          var postrequest = $http.post("/record/99/segment", data)
+          var postrequest = $http.post("/record/"+this.record_id+"/segment", data)
           postrequest.then(
               function (response) { // on success, clear segment from local data array
                 clearSegment(segment_id)
@@ -167,6 +174,10 @@
           segments[this._csid()].acceleration_data.push(0)
           console.log(segments)
           console.log("Total number of stored segments: " + this.getSegmentCount())
+        },
+        startRecording: function startRecording (){
+          this.record_id = getNewRecordHash()
+          console.log("record_id: " + this.record_id)
         }
       }
     }); // end factory // Data
@@ -202,6 +213,8 @@
               $window.removeEventListener("devicemotion", $scope.process_motion, false);
             }
           } else {
+            // start recording, and set up the record_id here
+            Data.startRecording()
             if ($rootScope.isMockMode){
               $scope.interval_id = $window.setInterval(function () {$scope.process_motion($scope.fakeRattle())}, 50)
               console.log("starting mock rattle")

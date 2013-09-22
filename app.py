@@ -23,7 +23,7 @@ def home():
     return make_response(open('rattlebus.html').read())  # TOOD replace with send_file() in production
 
 
-@app.route('/record/<int:record_id>/segment', methods=['POST'])
+@app.route('/record/<record_id>/segment', methods=['POST'])
 def upload_segment(record_id=1):
     data = request.json
     data.update({"record_id": record_id})
@@ -32,7 +32,7 @@ def upload_segment(record_id=1):
     return make_response(("ok", 200, []))
 
 
-@app.route('/record/<int:record_id>', methods=['GET'])
+@app.route('/record/<record_id>', methods=['GET'])
 def view_segments(record_id=1):
     segments = g.rattlebus_db.find({"record_id": record_id})
     return render_template("segments.html", segments=segments)
