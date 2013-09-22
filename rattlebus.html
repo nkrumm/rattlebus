@@ -50,21 +50,35 @@
         }
       });
 
-    App.service('User', function($rootScope) {
-      var username = "Anonymous"
+    App.service('StorageService', function(localStorageService) {
+      // set up localdatastor
+      var ls = localStorageService;
+      return {
+        add : function (key, value) {
+          ls.add(key, value);
+        },
+        get : function (key) {
+          return ls.get(key)
+        }
+      }
+    }); // end StorageService
+
+    App.service('User', function($rootScope, StorageService) {
+      var username = StorageService.get("username")
+      if (username == undefined){
+        var username = "Anonymous"
+      }
+
       return {
         username: username,
         setUserName: function (username) {
           this.username = username
+          StorageService.add("username", this.username)
         }
       }
     }); // end User service
 
-    App.service('Data', function ($rootScope, localStorageService, User, $http) {
-      // set up localdatastor
-      var ls = localStorageService;
-      ls.clearAll()
-
+    App.service('Data', function ($rootScope, User, $http) {
       // set up record id
       var record_id
 
