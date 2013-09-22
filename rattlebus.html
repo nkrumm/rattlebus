@@ -24,7 +24,7 @@
     <link href="/static/chart.css" rel="stylesheet" media="screen">
     <link href="/static/main.css" rel="stylesheet" media="screen">
     <!-- font awesome -->
-    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <!--<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">-->
 
     <script>
     document.addEventListener(
@@ -415,7 +415,6 @@
 
     <div class='panel centered'>
       <div ng-controller='StatsViewer'>
-        <!-- <button type='button' class='btn btn-success btn-large' ng-click='toggleRecording()'>Start Recording</button> -->
         <button class="btn btn-large" ng-class="{true: 'btn-success', false: 'btn-danger'}[!isRecording]" ng-click="toggleRecording()">
           {{!isRecording && 'Start' || 'Stop'}} Recording</button>
         <input type="checkbox" ng-model='isMockMode' ng-change='toggleMockMode()'/> Mock Mode
@@ -424,7 +423,5 @@
     </div>
     <!-- JavaScript plugins (requires jQuery) -->
     <!--<script src="http://code.jquery.com/jquery.js"></script>-->
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <!--<script src="static/bootstrap/js/bootstrap.min.js"></script>     -->
   </body>
 </html>
