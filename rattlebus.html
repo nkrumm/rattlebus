@@ -64,16 +64,13 @@
     }); // end StorageService
 
     App.service('User', function($rootScope, StorageService) {
-      var username = StorageService.get("username")
-      if (username == undefined){
-        var username = "Anonymous"
+      if (StorageService.get("username") == undefined){
+        StorageService.add("username", "Anonymous")
       }
-
       return {
-        username: username,
+        getUserName: function () {return StorageService.get("username")},
         setUserName: function (username) {
-          this.username = username
-          StorageService.add("username", this.username)
+          StorageService.add("username", username)
         }
       }
     }); // end User service
@@ -110,7 +107,7 @@
         console.log("CSID is now: " + currentSegmentId)
       }
       function getNewRecordHash(){
-        return CryptoJS.MD5(new Date().toString() + User.username).toString().slice(0,10)
+        return CryptoJS.MD5(new Date().toString() + User.getUserName()).toString().slice(0,10)
       }
       return {
         num_segments_to_send: num_segments_to_send,
@@ -119,7 +116,7 @@
           data.start_position = segments[segment_id].start_position
           data.end_position = segments[segment_id].end_position
           data.max_acceleration = Math.max.apply(null, segments[segment_id].acceleration_data);
-          data.username = User.username
+          data.username = User.getUserName()
           var postrequest = $http.post("/record/"+this.record_id+"/segment", data)
           postrequest.then(
               function (response) { // on success, clear segment from local data array
@@ -356,7 +353,7 @@
       };
     }); 
     App.controller("Settings", function ($scope, $modal, User) {
-      $scope.username = User.username
+      $scope.username = User.getUserName()
       $scope.openSettings = function () {
         var modalInstance = $modal.open({
           templateUrl: "settingsModal.html",
@@ -367,8 +364,9 @@
         })
         modalInstance.result.then(function (result){
           $scope.username = result
-          console.log("Set new username: " + $scope.username)
-          User.setUserName($scope.username)
+          console.log(User.getUserName())
+         // console.log("Set new username: " + $scope.username)
+         // User.setUserName($scope.username)
         }, function () {console.log("canceled!")})
       }
     }); // end controller
@@ -386,7 +384,7 @@
       <script type="text/ng-template" id="settingsModal.html">
           <div id='settings-modal'>
             <h2 style='text-align: center'>Settings</h2>
-            username: <input type="text" name="username" ng-model="form.username">
+            username: <input localstorage type="text" name="username" ng-model="form.username">
             <div class='panel centered'>
               <button class='btn' ng-click='save()'>Close</button>
             </div>
@@ -444,7 +442,7 @@
       <div ng-controller='StatsViewer'>
         <button class="btn btn-large" ng-class="{true: 'btn-success', false: 'btn-danger'}[!isRecording]" ng-click="toggleRecording()">
           {{!isRecording && 'Start' || 'Stop'}} Recording</button>
-        <input type="checkbox" ng-model='isMockMode' ng-change='toggleMockMode()'/> Mock Mode
+        <input type="checkbox" name="mockmode" ng-model='isMockMode' ng-change='toggleMockMode()'/> Mock Mode
       </div>
     </div>
     </div>

@@ -86,3 +86,18 @@ App.directive("hbar", function (){
     } // end link
   }
 }); // end directive
+
+App.directive("localstorage", function(localStorageService){
+  return {
+    restrict: "A",
+    scope: true,
+    link: function (scope, element, attrs) {
+      scope.$watch(element.attr('ng-model'), function(newval){
+        //if (newval){
+          localStorageService.add(attrs.name, newval)
+        //}
+      })
+
+    }
+  }
+}); // end directive
